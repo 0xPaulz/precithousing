@@ -2,35 +2,51 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-#loading model
-model = joblib.load('best_model.pkl')
+# page setup
+st.set_page_config(page_title="House Price Predictor", layout="centered")
 
 st.title("House Price Prediction (Machine Learning Group 6)")
-st.markdown("### Enter details below")
+st.markdown("Enter the house details below")
 
-#collecting user input
+# load the model only once
+@st.cache_resource
+def load_model():
+    return joblib.load("best_model.pkl")
+
+model = load_model()
+
+# two equal columns
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("#### Size & Rooms")
-    area        = st.number_input("Area (sq ft)", 1650, 20000, 6000, step=100)
-    bedrooms    = st.selectbox("Bedrooms", [1,2,3,4,5,6], index=2)
-    bathrooms   = st.selectbox("Bathrooms", [1,2,3,4], index=1)
-    stories     = st.selectbox("Stories", [1,2,3,4], index=1)
-    parking     = st.selectbox("Parking Spaces", [0,1,2,3], index=1)
-    mainroad    = st.selectbox("Near Main Road", ["yes", "no"])
+    st.subheader("Size & Rooms")
+    area = st.number_input("area (sq ft)", min_value=1650, max_value=20000, value=7500, step=100)
+    bedrooms = st.slider("bedrooms", 1, 6, 3)
+    bathrooms = st.slider("bathrooms", 1, 5, 2)
+    stories = st.slider("stories", 1, 4, 2)
+    parking = st.slider("parking spaces", 0, 3, 1)
 
 with col2:
-    st.markdown("#### Luxury & Location")
-    airconditioning = st.selectbox("Air Conditioning", ["yes", "no"], index=1)
-    prefarea       = st.selectbox("Preferred Neighborhood", ["yes", "no"])
-    guestroom      = st.selectbox("Guest Room", ["yes", "no"])
-    basement       = st.selectbox("Basement", ["yes", "no"])
-    hotwaterheating = st.selectbox("Hot Water Heating", ["yes", "no"])
-    furnishingstatus = st.selectbox("Furnishing", ["unfurnished", "semi-furnished", "furnished"], index=2)
-    
-if st.button("Predict House Price", type="primary"):
-    data = {
+    st.subheader("Location & Extras")
+    mainroad = st.selectbox("near main road?", ("yes", "no"))
+    guestroom = st.selectbox("guest room?", ("yes", "no"))
+    basement = st.selectbox("basement?", ("yes", "no"))
+    hotwaterheating = st.selectbox("hot water heating?", ("yes", "no"))
+    airconditioning = st.selectbox("air conditioning?", ("yes", "no"))
+    prefarea = st.selectbox("preferred area?", ("yes", "no"))
+
+# full-width row at the bottom
+st.markdown("---")
+furnishingstatus = st.radio(
+    "furnishing status",
+    ["furnished", "semi-furnished", "unfurnished"],
+    horizontal=True
+)
+
+# prediction button
+if st.button("Predict House Price", type="primary", use_container_width=True):
+    # put everything in the same order as during training
+    data = pd.DataFrame({
         'area': [area],
         'bedrooms': [bedrooms],
         'bathrooms': [bathrooms],
@@ -43,25 +59,10 @@ if st.button("Predict House Price", type="primary"):
         'parking': [parking],
         'prefarea': [prefarea],
         'furnishingstatus': [furnishingstatus]
-    }
-    
-    input_data = pd.DataFrame(data)
-    input_encoded = pd.get_dummies(input_data, drop_first=True)
-    
-    training_columns = ['area', 'bedrooms', 'bathrooms', 'stories', 'parking',
-                            'mainroad_yes', 'guestroom_yes', 'basement_yes',
-                            'hotwaterheating_yes', 'airconditioning_yes',
-                            'prefarea_yes', 'furnishingstatus_semi-furnished',
-                            'furnishingstatus_unfurnished']
-    input_ready = input_encoded.reindex(columns=training_columns, fill_value=0)
+    })
 
-    #predicting
-    price = model.predict(input_ready)[0]
-    
-    #printing the price
-    st.markdown(f"""
-    <h2 style='text-align: center; color: green;'>
-        Predicted Price: <b>₦{price:,.0f}</b>
-    </h2>
-    """, unsafe_allow_html=True)
+    price = model.predict(data)[0]
+
+    st.markdown("## ")
+    st.success(f"Predicted price: **₦{price:,.0f}**")
     st.balloons()
