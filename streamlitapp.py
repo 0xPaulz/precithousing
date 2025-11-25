@@ -12,22 +12,23 @@ st.markdown("### Enter details below")
 col1, col2 = st.columns(2)
 
 with col1:
-    area = st.number_input("Area (sq ft)", 1000, 20000, 5500)
-    bedrooms = st.selectbox("Bedrooms", [1,2,3,4,5,6])
-    bathrooms = st.selectbox("Bathrooms", [1,2,3,4])
-    stories = st.selectbox("Stories", [1,2,3,4])
-    parking = st.selectbox("Parking Spaces", [0,1,2,3])
-    mainroad = st.selectbox("Near Main Road", ["yes", "no"])
+    st.markdown("#### Size & Rooms")
+    area        = st.number_input("Area (sq ft)", 1650, 20000, 6000, step=100)
+    bedrooms    = st.selectbox("Bedrooms", [1,2,3,4,5,6], index=2)
+    bathrooms   = st.selectbox("Bathrooms", [1,2,3,4], index=1)
+    stories     = st.selectbox("Stories", [1,2,3,4], index=1)
+    parking     = st.selectbox("Parking Spaces", [0,1,2,3], index=1)
+    mainroad    = st.selectbox("Near Main Road", ["yes", "no"])
 
 with col2:
-    guestroom = st.selectbox("Guest Room", ["yes", "no"])
-    basement = st.selectbox("Basement", ["yes", "no"])
+    st.markdown("#### Luxury & Location")
+    airconditioning = st.selectbox("Air Conditioning", ["yes", "no"], index=1)
+    prefarea       = st.selectbox("Preferred Neighborhood", ["yes", "no"])
+    guestroom      = st.selectbox("Guest Room", ["yes", "no"])
+    basement       = st.selectbox("Basement", ["yes", "no"])
     hotwaterheating = st.selectbox("Hot Water Heating", ["yes", "no"])
-    airconditioning = st.selectbox("Air Conditioning", ["yes", "no"])
-    prefarea = st.selectbox("Preferred Area", ["yes", "no"])
-    furnishingstatus = st.selectbox("Furnishing", ["furnished", "semi-furnished", "unfurnished"])
-
-#prediction button
+    furnishingstatus = st.selectbox("Furnishing", ["unfurnished", "semi-furnished", "furnished"], index=2)
+    
 if st.button("Predict House Price", type="primary"):
     data = {
         'area': [area],
